@@ -8,6 +8,11 @@ editor_options:
 ---
 ## Project Description
 
+
+rainfall data compared with water quality advisories (
+temporal lag model- auto regressive model 
+)
+
 The interaction I aim to assess is the cumulative number of rain barrels installed across San Diego County compared to the water quality advisories for beaches in San Diego County. Rain barrels are supposed to catch run off from roofs (primarily) and store water locally, instead of it running into storm drains that eventually lead to the ocean. I predict that the number of water quality advisories would decrease with the increased number of rain barrels. Both data sets include 2023, one of the heavier rain years in San Diego County on record. I'd like to investigate how closely correlated rain barrel amount and the number of issued water quality advisories are with each other, with an increased emphasis on the year 2023. I predict that with the increase in rain barrel installations throughout the county, the fewer number of water quality advisories, despite the heavier rain year. 
 
 ```{r}
@@ -20,8 +25,10 @@ library(here)
 ## Load in and explore data
 
 ```{r}
-rain_barrels <- read_csv(here("data", "2023_W-2.1_Rain_Barrels_20241203.csv"))
+# rain_barrels <- read_csv(here("data", "2023_W-2.1_Rain_Barrels_20241203.csv"))
 
 wqa <- read_csv(here("data", "Department_of_Environmental_Health_Beach_Water_Quality_Advisories_20241203.csv"))
+
+sd_precip <- read_csv(here("data", "SDG_PRECIP.csv"))
 ```
 
