@@ -15,6 +15,16 @@ The interaction I aim to assess is the cumulative amount of rain (in) across coa
 
 Rain barrels are supposed to catch run off from roofs (primarily) and store water locally, instead of it running into storm drains that eventually lead to the ocean. I predict that the number of water quality advisories would decrease with the increased number of rain barrels. Both data sets include 2023, one of the heavier rain years in San Diego County on record. I'd like to investigate how closely correlated rain barrel amount and the number of issued water quality advisories are with each other, with an increased emphasis on the year 2023. I predict that with the increase in rain barrel installations throughout the county, the fewer number of water quality advisories, despite the heavier rain year.
 
+# Outline
+
+-   Load libraries
+-   Load data
+-   Explore and tidy data
+-   Conduct poisson analysis
+-   (if poisson analysis suggests) conduct negative binomial regression analysis
+-   Plot results
+-   Explain results
+
 ```{r}
 # Load Libraries
 library(tidyverse)
@@ -97,7 +107,8 @@ ggplot(data=wqa_sd_precip, aes(x = rain_inch_total, y = total_closure_beach_days
   labs(x= "Amount of rain (inches)",
        y = "Total number of beach closures",
       title = 'Rain amount v Beach closure amount in Coastal San Diego County from 2016-2020')+
-  geom_smooth(method = lm, se = FALSE)
+  geom_smooth(method = lm, se = FALSE)+
+  theme_minimal()
 ```
 
 # Begin the regression analysis
@@ -126,14 +137,16 @@ summary(model)
 
 ```{r}
 # Plot it
-
-
+ggplot(data = wqa_sd_precip, aes(x = rain_inch_total, y = total_closure_beach_days)) +
+  geom_point(color = "cornflowerblue") +
+  geom_smooth(method = "glm.nb", se = FALSE, color = "firebrick") +
+  labs(x = "Rain (inches/month)", 
+       y = "Beach Closures (amount/month)", 
+       title = "Negative Binomial Regression") + # update title
+  theme_minimal()
 ```
 
 # Negative binomal regression model interpretations:
-```{r}
-
-```
 
 
 ## Citations:
