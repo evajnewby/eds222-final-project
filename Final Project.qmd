@@ -6,29 +6,134 @@ editor: visual
 editor_options: 
   chunk_output_type: console
 ---
+
 ## Project Description
 
+rainfall data compared with beach closure ( temporal lag model- auto regressive model )
 
-rainfall data compared with water quality advisories (
-temporal lag model- auto regressive model 
-)
+The interaction I aim to assess is the cumulative amount of rain (in) across coastal San Diego County (from 2 coastal stations, oceanide harbor and San Diego International Airport) compared to the water quality advisories for beaches in San Diego County. I have monthly data from January 1, 2016 through March 31, 2020 to analyze.
 
-The interaction I aim to assess is the cumulative number of rain barrels installed across San Diego County compared to the water quality advisories for beaches in San Diego County. Rain barrels are supposed to catch run off from roofs (primarily) and store water locally, instead of it running into storm drains that eventually lead to the ocean. I predict that the number of water quality advisories would decrease with the increased number of rain barrels. Both data sets include 2023, one of the heavier rain years in San Diego County on record. I'd like to investigate how closely correlated rain barrel amount and the number of issued water quality advisories are with each other, with an increased emphasis on the year 2023. I predict that with the increase in rain barrel installations throughout the county, the fewer number of water quality advisories, despite the heavier rain year. 
+Rain barrels are supposed to catch run off from roofs (primarily) and store water locally, instead of it running into storm drains that eventually lead to the ocean. I predict that the number of water quality advisories would decrease with the increased number of rain barrels. Both data sets include 2023, one of the heavier rain years in San Diego County on record. I'd like to investigate how closely correlated rain barrel amount and the number of issued water quality advisories are with each other, with an increased emphasis on the year 2023. I predict that with the increase in rain barrel installations throughout the county, the fewer number of water quality advisories, despite the heavier rain year.
 
 ```{r}
 # Load Libraries
 library(tidyverse)
 library(MASS)
 library(here)
+library(kableExtra)
+library(dplyr)
+library(lubridate)
 ```
 
 ## Load in and explore data
 
 ```{r}
+# Read in data from data folder
+wqa <- read_csv(here("data", "Department_of_Environmental_Health_Beach_Water_Quality_Advisories_20241203.csv")) %>% 
+  mutate(Date = str_replace(Date, "AM", "")) %>% 
+  mutate(Date = str_replace(Date, "12:00:00", ""))%>% 
+ mutate(Date = str_trim(Date))
+
+sd_precip <- read_csv(here("data", "SDG_PRECIP.csv")) 
+
 # rain_barrels <- read_csv(here("data", "2023_W-2.1_Rain_Barrels_20241203.csv"))
-
-wqa <- read_csv(here("data", "Department_of_Environmental_Health_Beach_Water_Quality_Advisories_20241203.csv"))
-
-sd_precip <- read_csv(here("data", "SDG_PRECIP.csv"))
 ```
 
+## Clean Data:
+
+```{r}
+# Clean column names, convert to lower case
+colnames(wqa) <- tolower(colnames(wqa))
+colnames(sd_precip) <- tolower(colnames(sd_precip))
+
+# Remove spaces
+colnames(wqa) <- gsub(" ", "_", colnames(wqa))
+colnames(sd_precip) <- gsub(" ", "_", colnames(sd_precip))
+
+# Remove preceding zeros in wqa date column
+wqa$date <- sub("^0", "", wqa$date)
+
+```
+
+```{r}
+# Check class of date columns
+print(class(sd_precip$date))
+print(class(wqa$date))
+
+# Convert from character to datetime
+sd_precip$date <- mdy(sd_precip$date)
+wqa$date <- mdy(wqa$date)
+
+# Confirm conversion
+print(class(sd_precip$date))
+print(class(wqa$date))
+```
+
+```{r}
+# Set days equal to the 1st, keep only months since we are doing a monthly analysis
+wqa$date <- floor_date(wqa$date, unit = "month")
+```
+
+```{r}
+# Remove columns we don't need
+wqa <- subset(wqa, select = -c(fy, quarter))
+
+sd_precip <- subset(sd_precip, select = -c(rain_inches_sd, rain_inches_osm))
+```
+
+Now that we have all our data tidy, let's join our tables together to prepare for further analysis.
+
+```{r}
+# Join tables
+wqa_sd_precip <- full_join(wqa, sd_precip, by = "date")
+```
+
+# Plot without regression
+
+```{r}
+# Plot raw data for beginner visualization
+ggplot(data=wqa_sd_precip, aes(x = rain_inch_total, y = total_closure_beach_days)) +
+  geom_point()+
+  labs(x= "Amount of rain (inches)",
+       y = "Total number of beach closures",
+      title = 'Rain amount v Beach closure amount in Coastal San Diego County from 2016-2020')+
+  geom_smooth(method = lm, se = FALSE)
+```
+
+# Begin the regression analysis
+
+Let's first check for over-dispersion in the data. If the variance exceeds the mean, then a negative binomial regression may be the way to go.
+
+```{r}
+# Fit Poisson model
+poisson_model <- glm(total_closure_beach_days ~ rain_inch_total, family = poisson, data = wqa_sd_precip)
+
+# Calculate dispersion statistic
+dispersion <- sum(residuals(poisson_model, type = "pearson")^2) / poisson_model$df.residual
+
+# If dispersion > 1, overdispersion is present
+dispersion
+```
+
+As the dispersion is 18.76, over-dispersion is present. We can continue with the negative binomial regression model as the poisson model does not account for over-dispersion.
+
+```{r}
+# Negative binomial regression model
+model <- glm.nb(total_closure_beach_days ~ rain_inch_total, data = wqa_sd_precip)
+
+summary(model)
+```
+
+```{r}
+# Plot it
+
+
+```
+
+# Negative binomal regression model interpretations:
+```{r}
+
+```
+
+
+## Citations:
