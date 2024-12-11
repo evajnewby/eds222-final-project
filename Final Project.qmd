@@ -1,6 +1,7 @@
 ---
 title: "Total Beach Closure Days as a Funtion of Rainfall in Coastal San Diego County"
 author: "Eva Newby"
+date: "December 11, 2024"
 format: html
 editor: visual
 warning: false
@@ -16,7 +17,7 @@ Coastal San Diego County is known for many things; most notable are it's world c
 
 The interaction I aim to assess is the cumulative amount of rain (in) from 2 coastal San Diego County stations, Oceanside Harbor and San Diego International Airport, compared to the total beach closure days for the beaches in San Diego County. The data was collected on a monthly basis from January 1, 2016 through April 1, 2020. The number of beach closure days (`total_closure_beach_days`) will be modeled as a function of the total rainfall (`rain_inch_total`) in the following analysis.
 
-The water quality advisories data was accessed from San Diego County's online data catalog and is cited the "citations" section. The precipitation data for the two collection stations was accessed ...
+The water quality advisories data was accessed from San Diego County's online data catalog and is cited the "citations" section. The precipitation data for the two collection stations was accessed from the California Department of Water Resources Query System. 
 
 # Outline
 
@@ -171,7 +172,7 @@ Data biases and limitations present in this analysis was the the omission/absenc
 
 ## Citations:
 
-
+California Department of Water Resources. CDEC Query Monthly. California Data Exchange Center. Retrieved December 5, 2024, from https://cdec.water.ca.gov/dynamicapp/QueryMonthly
 
 KPBS. (2022, December 28). Swimmers, beware: Rain brings contaminated urban runoff to beaches. KPBS. https://www.kpbs.org/news/environment/2022/12/28/swimmers-beware-rain-brings-contaminated-urban-runoff-to-beaches
 

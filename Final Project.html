@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Eva Newby">
+<meta name="dcterms.date" content="2024-12-11">
 
 <title>Total Beach Closure Days as a Funtion of Rainfall in Coastal San Diego County</title>
 <style>
@@ -94,6 +95,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           </div>
   </div>
     
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">December 11, 2024</p>
+    </div>
+  </div>
   
     
   </div>
@@ -106,14 +113,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="beach.jpg" class="img-fluid figure-img"></p>
-<figcaption>Rain in San Diego County brings Beach Closures</figcaption>
+<figcaption>Rain in San Diego County brings Beach Closures from KPBS News</figcaption>
 </figure>
 </div>
 <section id="project-description" class="level2">
 <h2 class="anchored" data-anchor-id="project-description">Project Description</h2>
 <p>Coastal San Diego County is known for many things; most notable are it’s world class beaches with surfable waves year-round, driving locals and tourist alike to the coast. San Diego is also known for it’s mild climate, boasting warm winters with low precipitation. However, the effects of climate change have undoubtedly brought more extreme weather to the region, including precipitation. Growing up in north county San Diego as a surfer, I was taught to not enter the ocean for 48-72 hours after a “big rain”, as the water was likely polluted. As climate change continues to affect the world, it is important to understand just how related rainfall is with extreme water quality advisories that warrant closing of a beach.</p>
 <p>The interaction I aim to assess is the cumulative amount of rain (in) from 2 coastal San Diego County stations, Oceanside Harbor and San Diego International Airport, compared to the total beach closure days for the beaches in San Diego County. The data was collected on a monthly basis from January 1, 2016 through April 1, 2020. The number of beach closure days (<code>total_closure_beach_days</code>) will be modeled as a function of the total rainfall (<code>rain_inch_total</code>) in the following analysis.</p>
-<p>The water quality advisories data was accessed from San Diego County’s online data catalog and is cited the “citations” section. The precipitation data for the two collection stations was accessed …</p>
+<p>The water quality advisories data was accessed from San Diego County’s online data catalog and is cited the “citations” section. The precipitation data for the two collection stations was accessed from the California Department of Water Resources Query System.</p>
 </section>
 <section id="outline" class="level1">
 <h1>Outline</h1>
@@ -312,8 +319,10 @@ Number of Fisher Scoring iterations: 1
 <p>The expected number of closure days with no rainfall is approximately 2.63 days. For each additional inch of rain, the log count of beach closure days increases by ~ 0.21 days. For each additional inch of rainfall, the expected number of beach closure days increases by about 23.2%. The y-intercept’s p-value is 0.00376, meaning rainfall is statistically significant in predicting the number of beach closure days.</p>
 <p>What to do next? Rain is just one factor likely affecting beach closure days. From San Diego County’s website regarding beach water quality advisories, “Advisories are issued when beach water quality may exceed health standards. Closures are issued when sewage or other chemical spills impact or can potentially impact beach water quality”. Adding in monthly data on sewage and/or chemical spills in the analysis would provide a more comprehensive picture of the factors affecting beach closure days.</p>
 <p>Data biases and limitations present in this analysis was the the omission/absence of monthly rainfall data for other weather stations near the coast in San Diego County. Gaining access to precipitation data for more than two weather stations was a challenge given the time frame of this project. For a more complete analysis, more weather data from the other stations in San Diego county, as well as data of sewage/chemical spills should be included. Sewage/chemical spill data should be tested for any evidence of omitted variable bias.</p>
-<section id="data-citations" class="level2">
-<h2 class="anchored" data-anchor-id="data-citations">Data Citations:</h2>
+<section id="citations" class="level2">
+<h2 class="anchored" data-anchor-id="citations">Citations:</h2>
+<p>California Department of Water Resources. CDEC Query Monthly. California Data Exchange Center. Retrieved December 5, 2024, from https://cdec.water.ca.gov/dynamicapp/QueryMonthly</p>
+<p>KPBS. (2022, December 28). Swimmers, beware: Rain brings contaminated urban runoff to beaches. KPBS. https://www.kpbs.org/news/environment/2022/12/28/swimmers-beware-rain-brings-contaminated-urban-runoff-to-beaches</p>
 <p>San Diego County. April 2, 2020. Beach water quality advisories. Open Data Portal. Retrieved November 12, 2024, from https://data.sandiegocounty.gov/stories/s/32jp-ecqs</p>
 </section>
 </section>
