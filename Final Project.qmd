@@ -11,6 +11,8 @@ editor_options:
 
 ![Rain in San Diego County brings Beach Closures from KPBS News](beach.jpg)
 
+Repository Link: https://github.com/evajnewby/eds222-final-project 
+
 ## Project Description
 
 Coastal San Diego County is known for many things; most notable are it's world class beaches with surfable waves year-round, driving locals and tourist alike to the coast. San Diego is also known for it's mild climate, boasting warm winters with low precipitation. However, the effects of climate change have undoubtedly brought more extreme weather to the region, including precipitation. Growing up in north county San Diego as a surfer, I was taught to not enter the ocean for 48-72 hours after a "big rain", as the water was likely polluted. As climate change continues to affect the world, it is important to understand just how related rainfall is with extreme water quality advisories that warrant closing of a beach. 
