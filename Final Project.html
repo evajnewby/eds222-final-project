@@ -110,56 +110,49 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="beach.jpg" class="img-fluid figure-img"></p>
-<figcaption>Rain in San Diego County brings Beach Closures from KPBS News</figcaption>
-</figure>
-</div>
-<p><a href="https://github.com/evajnewby/eds222-final-project">Repository Link</a></p>
+<p><img src="beach.jpg" class="img-fluid" alt="Rain in San Diego County brings Beach Closures from KPBS News"> <a href="https://github.com/evajnewby/eds222-final-project">Repository Link</a></p>
 <section id="project-description" class="level2">
 <h2 class="anchored" data-anchor-id="project-description">Project Description</h2>
-<p>Coastal San Diego County is known for many things; most notable are it’s world class beaches with surfable waves year-round, driving locals and tourist alike to the coast. San Diego is also known for it’s mild climate, boasting warm winters with low precipitation. However, the effects of climate change have undoubtedly brought more extreme weather to the region, including precipitation. Growing up in north county San Diego as a surfer, I was taught to not enter the ocean for 48-72 hours after a “big rain”, as the water was likely polluted. As climate change continues to affect the world, it is important to understand just how related rainfall is with extreme water quality advisories that warrant closing of a beach.</p>
-<p>The interaction I aim to assess is the cumulative amount of rain in inches from 2 coastal San Diego County stations, Oceanside Harbor and San Diego International Airport, compared to the total beach closure days for the beaches in San Diego County. The data was collected on a monthly basis from January 1, 2016 through April 1, 2020. The number of beach closure days (<code>total_closure_beach_days</code>) will be modeled as a function of the total rainfall (<code>rain_inch_total</code>) in the following analysis.</p>
+<p>Coastal San Diego County is known for many things; most notable are the world class beaches with surfable waves year-round and sunny days, driving locals and tourists alike to the coast. San Diego is also known for it’s mild climate, boasting warm winters with generally low precipitation. However, the effects of climate change have undoubtedly brought more extreme weather to the region, including precipitation. A 2017 article from UC Merced in conjunction with Univeristy of California, San Diego’s Scripps Institute of Oceanography predicts “the region will have 16 percent fewer rainy days, but 8 percent more rain during large, intense storms, which could lead to more frequent flooding. In addition to property damage and disruption of transportation, flooding leads to our ocean becoming more polluted”. Additionally, the article notes that flooding leads to wetlands’ impaired ability to act as pollution filters for runoff into the ocean. There is some local knowledge of this phenomena already. Growing up in north county San Diego as a surfer, I was taught to not enter the ocean for 24-72 hours after a “big rain”, as the water was likely polluted and to avoid sickness. As climate change continues to affect the world, it is important to understand just how related rainfall is with extreme water quality advisories that warrant closing of a beach, and the potential hindering of an coastline economy. Could rainfall be the key component to predicting beach closures?</p>
+<p>The interaction I aim to assess in this blog post is the cumulative amount of rain in inches from 2 coastal San Diego County stations, Oceanside Harbor and San Diego International Airport, compared to the total beach closure days for the beaches in San Diego County. The data was collected on a monthly basis from January 1, 2016 through April 1, 2020. The number of beach closure days (<code>total_closure_beach_days</code>) will be modeled as a function of the total rainfall (<code>rain_inch_total</code>) in the following analysis.</p>
 <p>The water quality advisories data was accessed from San Diego County’s online data catalog. The precipitation data for the two collection stations was accessed from the California Department of Water Resources Query System.</p>
 </section>
 <section id="outline" class="level1">
 <h1>Outline</h1>
 <ul>
 <li>Load libraries</li>
-<li>Load data</li>
+<li>Read in data</li>
 <li>Explore and tidy data</li>
 <li>Explore linear regression analysis</li>
 <li>Conduct poisson analysis</li>
 <li>(if poisson analysis suggests) conduct negative binomial regression analysis</li>
 <li>Plot results</li>
-<li>Explain results</li>
+<li>Results interpretation</li>
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load Libraries</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(MASS) <span class="co"># for negative binomial regression</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(here)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate) <span class="co"># for dates</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<section id="load-in-and-explore-data" class="level2">
-<h2 class="anchored" data-anchor-id="load-in-and-explore-data">Load-in and Explore Data:</h2>
+<section id="load-in-data" class="level2">
+<h2 class="anchored" data-anchor-id="load-in-data">Load-in Data:</h2>
+<p>Read in data from data folder:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Read in data from data folder:</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Water Quality Advisories</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>wqa <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"Department_of_Environmental_Health_Beach_Water_Quality_Advisories_20241203.csv"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Date =</span> <span class="fu">str_replace</span>(Date, <span class="st">"AM"</span>, <span class="st">""</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Date =</span> <span class="fu">str_replace</span>(Date, <span class="st">"12:00:00"</span>, <span class="st">""</span>))<span class="sc">%&gt;%</span> </span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a> <span class="fu">mutate</span>(<span class="at">Date =</span> <span class="fu">str_trim</span>(Date))</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Precipitation Data</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>sd_precip <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"SDG_PRECIP.csv"</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Water Quality Advisories</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>wqa <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"Department_of_Environmental_Health_Beach_Water_Quality_Advisories_20241203.csv"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Date =</span> <span class="fu">str_replace</span>(Date, <span class="st">"AM"</span>, <span class="st">""</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Date =</span> <span class="fu">str_replace</span>(Date, <span class="st">"12:00:00"</span>, <span class="st">""</span>))<span class="sc">%&gt;%</span> </span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a> <span class="fu">mutate</span>(<span class="at">Date =</span> <span class="fu">str_trim</span>(Date))</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Precipitation Data</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>sd_precip <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"SDG_PRECIP.csv"</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="clean-data" class="level2">
 <h2 class="anchored" data-anchor-id="clean-data">Clean Data:</h2>
+<p>To more efficiently work with the data, let’s convert to lower case, remove any spaces, check the data types of our columns, and remove any columns not needed for this analysis.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Clean column names, convert to lower case</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(wqa) <span class="ot">&lt;-</span> <span class="fu">tolower</span>(<span class="fu">colnames</span>(wqa))</span>
@@ -215,6 +208,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="linear-regression-analysis" class="level1">
 <h1>Linear Regression Analysis:</h1>
+<p>Linear regression is a common statistical analysis, let’s see how this model fits our data, and if our data meets the assumptions of linear regression.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot raw data for beginner visualization</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data=</span>wqa_sd_precip, <span class="fu">aes</span>(<span class="at">x =</span> rain_inch_total, <span class="at">y =</span> total_closure_beach_days)) <span class="sc">+</span></span>
@@ -232,7 +226,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>We may have jumped the gun with the above plot. Let’s dig into some of the assumptions of linear regression to make sure that this is the best model for it.</p>
+<p>We may have jumped the gun with the above plot. Let’s dig into some of the assumptions of linear regression to make sure that this is the best model for our data.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Is our data normally distributed?</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> wqa_sd_precip, <span class="fu">aes</span>(<span class="at">x =</span> total_closure_beach_days))<span class="sc">+</span></span>
@@ -246,12 +240,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>We can see above that the data is not normally distributed; the data is right-skewed. Additionally, our response variable is not a continuous variable, it’s a count variable. This suggests that linear regression is not the best model for this analysis.</p>
-<p>A poisson/negative binomial regression assumes the following: over-dispersion, the response variable is a count variable, and the observations are independent.</p>
+<p>We can see above that the data is not normally distributed; the data is right-skewed. Additionally, our response variable is not a continuous variable, it’s a count variable. This suggests that linear regression is not the best model for this analysis and we should look elsewhere.</p>
+<p>A poisson/negative binomial regression assumes the following: over-dispersion, the response variable is a count variable, and the observations are independent, all of which match up with the data.</p>
 </section>
 <section id="begin-the-negative-binomial-regression-analysis" class="level1">
 <h1>Begin the Negative Binomial Regression Analysis:</h1>
-<p>Let’s first check for over-dispersion in the data by fitting a Poisson model. If the variance exceeds the mean, then we can proceed with a negative binomial regression.</p>
+<p>Let’s first check for over-dispersion in the data by fitting a Poisson model. If the variance exceeds the mean, then we can proceed with a negative binomial regression model.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit Poisson model</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>poisson_model <span class="ot">&lt;-</span> <span class="fu">glm</span>(total_closure_beach_days <span class="sc">~</span> rain_inch_total, <span class="at">family =</span> poisson, <span class="at">data =</span> wqa_sd_precip)</span>
@@ -265,7 +259,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>[1] 18.75829</code></pre>
 </div>
 </div>
-<p>As the dispersion is 18.76, over-dispersion is present. We can continue with the negative binomial regression model as the poisson model does not account for over-dispersion.</p>
+<p>As the dispersion is 18.76, which is greater than 1, over-dispersion is present. We can continue with the negative binomial regression model as the poisson model does not account for over-dispersion.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Negative binomial regression model</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">glm.nb</span>(total_closure_beach_days <span class="sc">~</span> rain_inch_total, <span class="at">data =</span> wqa_sd_precip)</span>
@@ -299,6 +293,7 @@ Number of Fisher Scoring iterations: 1
  2 x log-likelihood:  -401.497 </code></pre>
 </div>
 </div>
+<p>Let’s visualize what the negative binomial regression looks like on a plot.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot it</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> wqa_sd_precip, <span class="fu">aes</span>(<span class="at">x =</span> rain_inch_total, <span class="at">y =</span> total_closure_beach_days)) <span class="sc">+</span></span>
@@ -317,16 +312,18 @@ Number of Fisher Scoring iterations: 1
 </div>
 </div>
 </section>
-<section id="negative-binomal-regression-model-interpretations" class="level1">
-<h1>Negative Binomal Regression Model Interpretations:</h1>
-<p>The expected number of closure days with no rainfall is approximately 2.63 days. For each additional inch of rain, the log count of beach closure days increases by ~ 0.21 days. For each additional inch of rainfall, the expected number of beach closure days increases by about 23.2%. The y-intercept’s p-value is 0.00376, meaning rainfall is statistically significant in predicting the number of beach closure days.</p>
-<p>What to do next? Rain is just one factor likely affecting beach closure days. From San Diego County’s website regarding beach water quality advisories, “Advisories are issued when beach water quality may exceed health standards. Closures are issued when sewage or other chemical spills impact or can potentially impact beach water quality”. Adding in monthly data on sewage and/or chemical spills in the analysis would provide a more comprehensive picture of the factors affecting beach closure days.</p>
-<p>Data biases and limitations present in this analysis was the the omission/absence of monthly rainfall data for other weather stations near the coast in San Diego County. Gaining access to precipitation data for more than two weather stations was a challenge given the time frame of this project. For a more complete analysis, more weather data from the other stations in San Diego county, as well as data of sewage/chemical spills should be included. Sewage/chemical spill data should be tested for any evidence of omitted variable bias.</p>
+<section id="negative-binomal-regression-model-and-plot-interpretations" class="level1">
+<h1>Negative Binomal Regression Model and Plot Interpretations:</h1>
+<p>The expected number of closure days with no rainfall is approximately 2.63 days. For each additional inch of rain, the log count of beach closure days increases by about 0.21 days. For each additional inch of rainfall, the expected number of beach closure days increases by about 23.2%. The y-intercept’s p-value is 0.00376, meaning rainfall is statistically significant in predicting the number of beach closure days.</p>
+<p>These numbers are a bit shocking, namely that the one additional inch of rainfall increases a beach closure day by 23.2% and the p-value being very small, and very significant. These suggest that rainfall is likely an appropriate predictor for beach closures.</p>
+<p>What to do next? Rain is just one factor likely affecting beach closure days. From San Diego County’s website regarding beach water quality advisories, “Advisories are issued when beach water quality may exceed health standards. Closures are issued when sewage or other chemical spills impact or can potentially impact beach water quality”. Adding in monthly data on sewage and/or chemical spills in the analysis would provide a more comprehensive picture of the factors affecting beach closure days. Additionally, as the UC Merced article states, adding in data on lagoon flooding health may also be an important predictor in beach closure days. San Diego County boasts several lagoons (5 alone in north county!) with many popular surfing beaches at or near the lagoon outlets.</p>
+<p>Data biases and limitations present in this analysis was the the omission/absence of monthly rainfall data for other weather stations near the coast in San Diego County, best described by the availability bias. Availability bias states that a distortion may arise from the analysis of data that is readily available, rather than the data that best represents the processes happening. Gaining access and compiling precipitation data for more than two weather stations was a challenge given the time frame of completion for this project. For a more complete analysis, more weather data from the other stations in San Diego county, data of sewage/chemical spills, and lagoon flooding and health data should be included. Sewage/chemical spill data and lagoon health data should be tested for any evidence of omitted variable bias.</p>
 <section id="citations" class="level2">
 <h2 class="anchored" data-anchor-id="citations">Citations:</h2>
 <p>California Department of Water Resources. CDEC Query Monthly. California Data Exchange Center. Retrieved December 5, 2024, from https://cdec.water.ca.gov/dynamicapp/QueryMonthly</p>
 <p>KPBS. (2022, December 28). Swimmers, beware: Rain brings contaminated urban runoff to beaches. KPBS. https://www.kpbs.org/news/environment/2022/12/28/swimmers-beware-rain-brings-contaminated-urban-runoff-to-beaches</p>
 <p>San Diego County. April 2, 2020. Beach water quality advisories. Open Data Portal. Retrieved November 12, 2024, from https://data.sandiegocounty.gov/stories/s/32jp-ecqs</p>
+<p>SnRI. (2017, October 30). Look at climate change effects in San Diego County. University of California, Merced. https://snri.ucmerced.edu/news/2017/look-climate-change-effects-san-diego-county</p>
 </section>
 </section>
 
