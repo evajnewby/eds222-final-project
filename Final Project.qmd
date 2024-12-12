@@ -1,5 +1,5 @@
 ---
-title: "Total Beach Closure Days as a Funtion of Rainfall in Coastal San Diego County"
+title: "Total Beach Closure Days as a Function of Rainfall in Coastal San Diego County"
 author: "Eva Newby"
 date: "December 11, 2024"
 format: html
@@ -11,15 +11,15 @@ editor_options:
 
 ![Rain in San Diego County brings Beach Closures from KPBS News](beach.jpg)
 
-Repository Link: https://github.com/evajnewby/eds222-final-project 
+[Repository Link](https://github.com/evajnewby/eds222-final-project)
 
 ## Project Description
 
 Coastal San Diego County is known for many things; most notable are it's world class beaches with surfable waves year-round, driving locals and tourist alike to the coast. San Diego is also known for it's mild climate, boasting warm winters with low precipitation. However, the effects of climate change have undoubtedly brought more extreme weather to the region, including precipitation. Growing up in north county San Diego as a surfer, I was taught to not enter the ocean for 48-72 hours after a "big rain", as the water was likely polluted. As climate change continues to affect the world, it is important to understand just how related rainfall is with extreme water quality advisories that warrant closing of a beach. 
 
-The interaction I aim to assess is the cumulative amount of rain (in) from 2 coastal San Diego County stations, Oceanside Harbor and San Diego International Airport, compared to the total beach closure days for the beaches in San Diego County. The data was collected on a monthly basis from January 1, 2016 through April 1, 2020. The number of beach closure days (`total_closure_beach_days`) will be modeled as a function of the total rainfall (`rain_inch_total`) in the following analysis.
+The interaction I aim to assess is the cumulative amount of rain in inches from 2 coastal San Diego County stations, Oceanside Harbor and San Diego International Airport, compared to the total beach closure days for the beaches in San Diego County. The data was collected on a monthly basis from January 1, 2016 through April 1, 2020. The number of beach closure days (`total_closure_beach_days`) will be modeled as a function of the total rainfall (`rain_inch_total`) in the following analysis.
 
-The water quality advisories data was accessed from San Diego County's online data catalog and is cited the "citations" section. The precipitation data for the two collection stations was accessed from the California Department of Water Resources Query System. 
+The water quality advisories data was accessed from San Diego County's online data catalog. The precipitation data for the two collection stations was accessed from the California Department of Water Resources Query System. 
 
 # Outline
 
@@ -38,19 +38,21 @@ library(tidyverse)
 library(MASS) # for negative binomial regression
 library(here)
 library(kableExtra)
-library(dplyr)
 library(lubridate)
 ```
 
 ## Load-in and Explore Data:
 
 ```{r}
-# Read in data from data folder
+# Read in data from data folder:
+# Water Quality Advisories
 wqa <- read_csv(here("data", "Department_of_Environmental_Health_Beach_Water_Quality_Advisories_20241203.csv")) %>% 
   mutate(Date = str_replace(Date, "AM", "")) %>% 
   mutate(Date = str_replace(Date, "12:00:00", ""))%>% 
  mutate(Date = str_trim(Date))
 
+
+# Precipitation Data
 sd_precip <- read_csv(here("data", "SDG_PRECIP.csv")) 
 ```
 
@@ -91,7 +93,7 @@ wqa$date <- floor_date(wqa$date, unit = "month")
 
 ```{r}
 # Remove columns we don't need
-wqa <- subset(wqa, select = -c(fy, quarter))
+wqa <- subset(wqa, select = c(date, total_closure_beach_days))
 
 sd_precip <- subset(sd_precip, select = -c(rain_inches_sd, rain_inches_osm))
 ```
@@ -111,7 +113,7 @@ ggplot(data=wqa_sd_precip, aes(x = rain_inch_total, y = total_closure_beach_days
   geom_point()+
   labs(x= "Rain (inches/month)",
        y = "Beach Closures (amount/month)",
-      title = 'Linear Regression of Rain v Beach Closures in Coastal San Diego County (2016-2020)')+
+      title = 'Linear Regression of Rain v Beach Closures in San Diego (2016-2020)')+
   geom_smooth(method = lm, se = FALSE)+
   theme_minimal()
 ```
@@ -125,13 +127,13 @@ ggplot(data = wqa_sd_precip, aes(x = total_closure_beach_days))+
   labs(x = "Beach Closure Amount")
 ```
 
-We can see above that the data is not normally distributed; the data is right-skewed. Additionally, our response variable is NOT a continuous variable, it's a count variable. This suggests that linear regression is not the best model for this analysis.
+We can see above that the data is not normally distributed; the data is right-skewed. Additionally, our response variable is not a continuous variable, it's a count variable. This suggests that linear regression is not the best model for this analysis.
 
-A poisson/negative binomial regression assumes the following: over-dispersion, the response variable is a count variable, observations are independent.
+A poisson/negative binomial regression assumes the following: over-dispersion, the response variable is a count variable, and the observations are independent.
 
 # Begin the Negative Binomial Regression Analysis:
 
-Let's first check for over-dispersion in the data. If the variance exceeds the mean, then we can proceed with a negative binomial regression.
+Let's first check for over-dispersion in the data by fitting a Poisson model. If the variance exceeds the mean, then we can proceed with a negative binomial regression.
 
 ```{r}
 # Fit Poisson model
@@ -160,7 +162,7 @@ ggplot(data = wqa_sd_precip, aes(x = rain_inch_total, y = total_closure_beach_da
   geom_smooth(method = "glm.nb", se = FALSE, color = "firebrick") +
   labs(x = "Rain (inches/month)", 
        y = "Beach Closures (amount/month)", 
-       title = "Negative Binomial Regression of Rain v Beach Closures in Coastal San Diego County (2016-2020)") +
+       title = "Negative Binomial Regression of Rain v Beach Closures San Diego (2016-2020)") +
   theme_minimal()
 ```
 

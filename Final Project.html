@@ -9,7 +9,7 @@
 <meta name="author" content="Eva Newby">
 <meta name="dcterms.date" content="2024-12-11">
 
-<title>Total Beach Closure Days as a Funtion of Rainfall in Coastal San Diego County</title>
+<title>Total Beach Closure Days as a Function of Rainfall in Coastal San Diego County</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -81,7 +81,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Total Beach Closure Days as a Funtion of Rainfall in Coastal San Diego County</h1>
+<h1 class="title">Total Beach Closure Days as a Function of Rainfall in Coastal San Diego County</h1>
 </div>
 
 
@@ -116,11 +116,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <figcaption>Rain in San Diego County brings Beach Closures from KPBS News</figcaption>
 </figure>
 </div>
+<p><a href="https://github.com/evajnewby/eds222-final-project">Repository Link</a></p>
 <section id="project-description" class="level2">
 <h2 class="anchored" data-anchor-id="project-description">Project Description</h2>
 <p>Coastal San Diego County is known for many things; most notable are it’s world class beaches with surfable waves year-round, driving locals and tourist alike to the coast. San Diego is also known for it’s mild climate, boasting warm winters with low precipitation. However, the effects of climate change have undoubtedly brought more extreme weather to the region, including precipitation. Growing up in north county San Diego as a surfer, I was taught to not enter the ocean for 48-72 hours after a “big rain”, as the water was likely polluted. As climate change continues to affect the world, it is important to understand just how related rainfall is with extreme water quality advisories that warrant closing of a beach.</p>
-<p>The interaction I aim to assess is the cumulative amount of rain (in) from 2 coastal San Diego County stations, Oceanside Harbor and San Diego International Airport, compared to the total beach closure days for the beaches in San Diego County. The data was collected on a monthly basis from January 1, 2016 through April 1, 2020. The number of beach closure days (<code>total_closure_beach_days</code>) will be modeled as a function of the total rainfall (<code>rain_inch_total</code>) in the following analysis.</p>
-<p>The water quality advisories data was accessed from San Diego County’s online data catalog and is cited the “citations” section. The precipitation data for the two collection stations was accessed from the California Department of Water Resources Query System.</p>
+<p>The interaction I aim to assess is the cumulative amount of rain in inches from 2 coastal San Diego County stations, Oceanside Harbor and San Diego International Airport, compared to the total beach closure days for the beaches in San Diego County. The data was collected on a monthly basis from January 1, 2016 through April 1, 2020. The number of beach closure days (<code>total_closure_beach_days</code>) will be modeled as a function of the total rainfall (<code>rain_inch_total</code>) in the following analysis.</p>
+<p>The water quality advisories data was accessed from San Diego County’s online data catalog. The precipitation data for the two collection stations was accessed from the California Department of Water Resources Query System.</p>
 </section>
 <section id="outline" class="level1">
 <h1>Outline</h1>
@@ -140,19 +141,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(MASS) <span class="co"># for negative binomial regression</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(here)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="load-in-and-explore-data" class="level2">
 <h2 class="anchored" data-anchor-id="load-in-and-explore-data">Load-in and Explore Data:</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Read in data from data folder</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>wqa <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"Department_of_Environmental_Health_Beach_Water_Quality_Advisories_20241203.csv"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Date =</span> <span class="fu">str_replace</span>(Date, <span class="st">"AM"</span>, <span class="st">""</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Date =</span> <span class="fu">str_replace</span>(Date, <span class="st">"12:00:00"</span>, <span class="st">""</span>))<span class="sc">%&gt;%</span> </span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a> <span class="fu">mutate</span>(<span class="at">Date =</span> <span class="fu">str_trim</span>(Date))</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>sd_precip <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"SDG_PRECIP.csv"</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Read in data from data folder:</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Water Quality Advisories</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>wqa <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"Department_of_Environmental_Health_Beach_Water_Quality_Advisories_20241203.csv"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Date =</span> <span class="fu">str_replace</span>(Date, <span class="st">"AM"</span>, <span class="st">""</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Date =</span> <span class="fu">str_replace</span>(Date, <span class="st">"12:00:00"</span>, <span class="st">""</span>))<span class="sc">%&gt;%</span> </span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a> <span class="fu">mutate</span>(<span class="at">Date =</span> <span class="fu">str_trim</span>(Date))</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Precipitation Data</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>sd_precip <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"SDG_PRECIP.csv"</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="clean-data" class="level2">
@@ -199,7 +202,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove columns we don't need</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>wqa <span class="ot">&lt;-</span> <span class="fu">subset</span>(wqa, <span class="at">select =</span> <span class="sc">-</span><span class="fu">c</span>(fy, quarter))</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>wqa <span class="ot">&lt;-</span> <span class="fu">subset</span>(wqa, <span class="at">select =</span> <span class="fu">c</span>(date, total_closure_beach_days))</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>sd_precip <span class="ot">&lt;-</span> <span class="fu">subset</span>(sd_precip, <span class="at">select =</span> <span class="sc">-</span><span class="fu">c</span>(rain_inches_sd, rain_inches_osm))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -218,7 +221,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span> <span class="st">"Rain (inches/month)"</span>,</span>
 <span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Beach Closures (amount/month)"</span>,</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">title =</span> <span class="st">'Linear Regression of Rain v Beach Closures in Coastal San Diego County (2016-2020)'</span>)<span class="sc">+</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">title =</span> <span class="st">'Linear Regression of Rain v Beach Closures in San Diego (2016-2020)'</span>)<span class="sc">+</span></span>
 <span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> lm, <span class="at">se =</span> <span class="cn">FALSE</span>)<span class="sc">+</span></span>
 <span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
@@ -243,12 +246,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>We can see above that the data is not normally distributed; the data is right-skewed. Additionally, our response variable is NOT a continuous variable, it’s a count variable. This suggests that linear regression is not the best model for this analysis.</p>
-<p>A poisson/negative binomial regression assumes the following: over-dispersion, the response variable is a count variable, observations are independent.</p>
+<p>We can see above that the data is not normally distributed; the data is right-skewed. Additionally, our response variable is not a continuous variable, it’s a count variable. This suggests that linear regression is not the best model for this analysis.</p>
+<p>A poisson/negative binomial regression assumes the following: over-dispersion, the response variable is a count variable, and the observations are independent.</p>
 </section>
 <section id="begin-the-negative-binomial-regression-analysis" class="level1">
 <h1>Begin the Negative Binomial Regression Analysis:</h1>
-<p>Let’s first check for over-dispersion in the data. If the variance exceeds the mean, then we can proceed with a negative binomial regression.</p>
+<p>Let’s first check for over-dispersion in the data by fitting a Poisson model. If the variance exceeds the mean, then we can proceed with a negative binomial regression.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit Poisson model</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>poisson_model <span class="ot">&lt;-</span> <span class="fu">glm</span>(total_closure_beach_days <span class="sc">~</span> rain_inch_total, <span class="at">family =</span> poisson, <span class="at">data =</span> wqa_sd_precip)</span>
@@ -303,7 +306,7 @@ Number of Fisher Scoring iterations: 1
 <span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"glm.nb"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">color =</span> <span class="st">"firebrick"</span>) <span class="sc">+</span></span>
 <span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Rain (inches/month)"</span>, </span>
 <span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Beach Closures (amount/month)"</span>, </span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Negative Binomial Regression of Rain v Beach Closures in Coastal San Diego County (2016-2020)"</span>) <span class="sc">+</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Negative Binomial Regression of Rain v Beach Closures San Diego (2016-2020)"</span>) <span class="sc">+</span></span>
 <span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
